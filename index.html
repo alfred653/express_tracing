@@ -1860,12 +1860,16 @@
         async function requeryFromHistory(index) {
             const item = filteredHistoryData[index];
             
-            if (!item.express_number) {
+            if (!item || !item.express_number) {
                 showToast('快递单号不存在', 'error');
                 return;
             }
             
-            // 检查剩余额度
+            if (!currentUser) {
+                showToast('请先登录', 'error');
+                return;
+            }
+            
             if (currentUser.total_quota - currentUser.used_quota <= 0) {
                 showToast('查询额度不足，请充值后再试', 'error');
                 openRechargeModal();
@@ -1879,33 +1883,89 @@
             try {
                 showLoading('正在查询中...');
                 
+                console.log('═══════════════════════════════════════');
+                console.log('🔍 再次查询快递');
+                console.log('═══════════════════════════════════════');
+                console.log('快递单号:', item.express_number);
+                console.log('手机号:', item.mobile || '无');
+                
+                // 检查 AppCode 配置
+                if (!ALIYUN_APPCODE || ALIYUN_APPCODE.includes('你的AppCode')) {
+                    hideLoading();
+                    throw new Error('请先在代码中配置阿里云 AppCode');
+                }
+                
                 // 构建请求参数
                 const formData = new URLSearchParams();
                 formData.append('number', item.express_number);
                 if (item.mobile) {
                     formData.append('mobile', item.mobile);
                 }
-                formData.append('expressCode', '');
                 
-                // 发起请求
+                console.log('📤 发送请求...');
+                
+                // 发送请求
                 const response = await fetch('https://jmexpresv2.market.alicloudapi.com/express/query-v2', {
                     method: 'POST',
                     headers: {
-                        'Authorization': '8c02c90948e246a994147ed55109955c ' + ALIYUN_APPCODE,
+                        'Authorization': 'APPCODE ' + ALIYUN_APPCODE,
                         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
                     },
                     body: formData.toString()
                 });
                 
-                const result = await response.json();
+                console.log('📥 收到响应');
+                console.log('状态码:', response.status);
                 
-                console.log('再次查询API返回结果:', result);
+                // 检查 HTTP 状态码
+                if (!response.ok) {
+                    hideLoading();
+                    
+                    let errorMsg = '';
+                    if (response.status === 401 || response.status === 403) {
+                        errorMsg = 'AppCode 认证失败，请检查配置';
+                    } else if (response.status === 429) {
+                        errorMsg = '请求过于频繁，请稍后再试';
+                    } else {
+                        errorMsg = 'HTTP错误: ' + response.status;
+                    }
+                    
+                    throw new Error(errorMsg);
+                }
                 
-                // 处理返回结果
+                // 获取响应文本
+                const responseText = await response.text();
+                console.log('📄 响应内容长度:', responseText.length);
+                console.log('📄 响应内容预览:', responseText.substring(0, 200));
+                
+                // 检查响应是否为空
+                if (!responseText || responseText.trim() === '') {
+                    hideLoading();
+                    throw new Error('API 返回空响应，请检查 AppCode 是否正确');
+                }
+                
+                // 尝试解析 JSON
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                    console.log('✅ JSON 解析成功');
+                } catch (jsonError) {
+                    console.error('❌ JSON 解析失败');
+                    console.error('原始响应:', responseText);
+                    hideLoading();
+                    
+                    if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+                        throw new Error('API 返回了 HTML 页面，AppCode 可能错误');
+                    }
+                    
+                    throw new Error('API 返回格式错误');
+                }
+                
+                // 处理查询结果
                 if (result.code === 200 && result.data) {
+                    console.log('✅ 查询成功');
                     const data = result.data;
                     
-                    // 转换为统一格式
                     const unifiedData = {
                         express_number: data.number,
                         company: data.expressCompanyName,
@@ -1921,7 +1981,6 @@
                         list: []
                     };
                     
-                    // 转换物流轨迹数据
                     if (data.logisticsTraceDetails && data.logisticsTraceDetails.length > 0) {
                         unifiedData.list = data.logisticsTraceDetails.map(function(item) {
                             return {
@@ -1936,10 +1995,7 @@
                         });
                     }
                     
-                    // 扣除额度
                     await updateUserQuota();
-                    
-                    // 记录查询日志
                     await logQuery(
                         item.express_number,
                         item.mobile || '',
@@ -1951,29 +2007,37 @@
                     
                     hideLoading();
                     showToast('查询成功！', 'success');
-                    
-                    // 重新加载历史记录
                     await loadHistoryData();
                     
                 } else {
                     hideLoading();
-                    showToast('查询失败：' + (result.msg || '未知错误'), 'error');
-                    
-                    // 记录失败日志
-                    await logQuery(
-                        item.express_number,
-                        item.mobile || '',
-                        '',
-                        'failed',
-                        result.msg || '',
-                        null
-                    );
+                    const errorMsg = result.msg || '未知错误';
+                    showToast('查询失败：' + errorMsg, 'error');
+                    await logQuery(item.express_number, item.mobile || '', '', 'failed', errorMsg, null);
                 }
                 
+                console.log('═══════════════════════════════════════');
+                console.log('✅ 查询流程完成');
+                console.log('═══════════════════════════════════════');
+                
             } catch (error) {
-                console.error('再次查询失败:', error);
+                console.error('═══════════════════════════════════════');
+                console.error('❌ 再次查询失败');
+                console.error('═══════════════════════════════════════');
+                console.error('错误:', error);
+                
                 hideLoading();
-                showToast('查询失败：' + error.message, 'error');
+                
+                let errorMsg = '查询失败：';
+                if (error.message.includes('AppCode')) {
+                    errorMsg += '\n请检查阿里云 AppCode 配置';
+                } else if (error.message.includes('认证')) {
+                    errorMsg += '\nAppCode 认证失败';
+                } else {
+                    errorMsg += '\n' + error.message;
+                }
+                
+                showToast(errorMsg, 'error');
             }
         }
 
@@ -2216,6 +2280,9 @@
         // ========================================
         // 用户查询：单个查询（阿里云快递查询API）
         // ========================================
+// ========================================
+        // 查询：单个查询（终极修复版）
+        // ========================================
         async function querySingleExpress(rowId) {
             const expressNumber = document.getElementById('expressNumber-' + rowId).value.trim();
             const mobile = document.getElementById('mobile-' + rowId).value.trim();
@@ -2225,7 +2292,11 @@
                 return;
             }
             
-            // 检查剩余额度
+            if (!currentUser) {
+                showToast('请先登录', 'error');
+                return;
+            }
+            
             if (currentUser.total_quota - currentUser.used_quota <= 0) {
                 showToast('查询额度不足，请充值后再试', 'error');
                 openRechargeModal();
@@ -2233,6 +2304,11 @@
             }
             
             const row = document.getElementById('queryRow-' + rowId);
+            if (!row) {
+                console.error('找不到行:', rowId);
+                return;
+            }
+            
             const statusCell = row.cells[2];
             const expressStatusCell = row.cells[3];
             const companyCell = row.cells[4];
@@ -2241,35 +2317,108 @@
             statusCell.innerHTML = '<span class="query-status-badge query-status-querying">查询中...</span>';
             
             try {
+                console.log('═══════════════════════════════════════');
+                console.log('🔍 开始查询快递');
+                console.log('═══════════════════════════════════════');
+                console.log('快递单号:', expressNumber);
+                console.log('手机号:', mobile || '无');
+                
+                // 检查 AppCode 配置
+                if (!ALIYUN_APPCODE || ALIYUN_APPCODE.includes('你的AppCode')) {
+                    throw new Error('请先在代码中配置阿里云 AppCode');
+                }
+                
+                console.log('AppCode 前10位:', ALIYUN_APPCODE.substring(0, 10) + '...');
+                
                 // 构建请求参数
                 const formData = new URLSearchParams();
                 formData.append('number', expressNumber);
                 if (mobile) {
                     formData.append('mobile', mobile);
                 }
-                // expressCode 留空，让API自动识别快递公司
-                formData.append('expressCode', '');
                 
-                // 发起请求
+                console.log('📤 发送请求...');
+                
+                // 发送请求
                 const response = await fetch('https://jmexpresv2.market.alicloudapi.com/express/query-v2', {
                     method: 'POST',
                     headers: {
-                        'Authorization': '8c02c90948e246a994147ed55109955c ' + ALIYUN_APPCODE,
+                        'Authorization': 'APPCODE ' + ALIYUN_APPCODE,
                         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
                     },
                     body: formData.toString()
                 });
                 
-                const result = await response.json();
+                console.log('📥 收到响应');
+                console.log('状态码:', response.status);
+                console.log('状态文本:', response.statusText);
+                console.log('Content-Type:', response.headers.get('content-type'));
                 
-                console.log('API返回结果:', result);
+                // 检查 HTTP 状态码
+                if (!response.ok) {
+                    let errorMsg = '';
+                    
+                    if (response.status === 400) {
+                        errorMsg = '请求参数错误，请检查快递单号格式';
+                    } else if (response.status === 401) {
+                        errorMsg = 'AppCode 认证失败，请检查 AppCode 是否正确';
+                    } else if (response.status === 403) {
+                        errorMsg = 'API 访问被拒绝，请检查 AppCode 权限或是否欠费';
+                    } else if (response.status === 404) {
+                        errorMsg = 'API 接口不存在';
+                    } else if (response.status === 429) {
+                        errorMsg = '请求过于频繁，请稍后再试';
+                    } else if (response.status >= 500) {
+                        errorMsg = '服务器错误(' + response.status + ')，请稍后再试';
+                    } else {
+                        errorMsg = 'HTTP错误: ' + response.status;
+                    }
+                    
+                    console.error('❌ HTTP错误:', errorMsg);
+                    throw new Error(errorMsg);
+                }
                 
-                // 处理返回结果
+                // 获取响应文本
+                const responseText = await response.text();
+                console.log('📄 响应内容长度:', responseText.length);
+                console.log('📄 响应内容预览:', responseText.substring(0, 500));
+                
+                // 检查响应是否为空
+                if (!responseText || responseText.trim() === '') {
+                    console.error('❌ 响应为空');
+                    throw new Error('API 返回空响应，请检查 AppCode 是否正确或是否欠费');
+                }
+                
+                // 尝试解析 JSON
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                    console.log('✅ JSON 解析成功');
+                    console.log('返回数据:', result);
+                } catch (jsonError) {
+                    console.error('❌ JSON 解析失败');
+                    console.error('JSON 错误:', jsonError.message);
+                    console.error('原始响应:', responseText);
+                    
+                    // 检查是否是 HTML 错误页面
+                    if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+                        throw new Error('API 返回了 HTML 页面，可能是 AppCode 错误或服务异常');
+                    }
+                    
+                    throw new Error('API 返回格式错误，无法解析 JSON');
+                }
+                
+                console.log('═══════════════════════════════════════');
+                console.log('📊 处理查询结果');
+                console.log('═══════════════════════════════════════');
+                console.log('返回码:', result.code);
+                console.log('返回消息:', result.msg);
+                
+                // 处理查询结果
                 if (result.code === 200 && result.data) {
-                    // 查询成功
+                    console.log('✅ 查询成功');
                     const data = result.data;
                     
-                    // 转换为统一格式存储
                     const unifiedData = {
                         express_number: data.number,
                         company: data.expressCompanyName,
@@ -2285,7 +2434,6 @@
                         list: []
                     };
                     
-                    // 转换物流轨迹数据
                     if (data.logisticsTraceDetails && data.logisticsTraceDetails.length > 0) {
                         unifiedData.list = data.logisticsTraceDetails.map(function(item) {
                             return {
@@ -2300,10 +2448,8 @@
                         });
                     }
                     
-                    // 缓存数据
                     queryDataCache[rowId] = unifiedData;
                     
-                    // 更新界面
                     statusCell.innerHTML = '<span class="query-status-badge query-status-success">查询成功</span>';
                     expressStatusCell.innerHTML = '<span class="express-status status-' + data.logisticsStatus + '">' + data.logisticsStatusDesc + '</span>';
                     companyCell.innerHTML = '<div style="display: flex; align-items: center; gap: 8px;">' +
@@ -2315,23 +2461,13 @@
                         '<button class="btn-query btn-detail" onclick="showLogisticsDetail(' + rowId + ')">详情</button>' +
                         '<button class="btn-query btn-delete" onclick="deleteQueryRow(' + rowId + ')">删除</button>';
                     
-                    // 扣除额度
                     await updateUserQuota();
-                    
-                    // 记录查询日志
-                    await logQuery(
-                        expressNumber, 
-                        mobile, 
-                        data.expressCompanyName, 
-                        'success', 
-                        data.logisticsStatusDesc, 
-                        unifiedData
-                    );
+                    await logQuery(expressNumber, mobile, data.expressCompanyName, 'success', data.logisticsStatusDesc, unifiedData);
                     
                     showToast('查询成功！', 'success');
                     
                 } else if (result.code === 201) {
-                    // 暂无物流信息
+                    console.log('⚠️ 暂无物流信息');
                     statusCell.innerHTML = '<span class="query-status-badge query-status-failed">暂无记录</span>';
                     expressStatusCell.textContent = '暂无物流信息';
                     companyCell.textContent = '-';
@@ -2339,8 +2475,26 @@
                     await logQuery(expressNumber, mobile, '', 'failed', '暂无记录', null);
                     showToast('暂无物流信息', 'error');
                     
+                } else if (result.code === 203) {
+                    console.log('⚠️ 快递单号错误');
+                    statusCell.innerHTML = '<span class="query-status-badge query-status-failed">单号错误</span>';
+                    expressStatusCell.textContent = '快递单号格式错误';
+                    companyCell.textContent = '-';
+                    
+                    await logQuery(expressNumber, mobile, '', 'failed', '单号错误', null);
+                    showToast('快递单号格式错误', 'error');
+                    
+                } else if (result.code === 204) {
+                    console.log('⚠️ 无法识别快递公司');
+                    statusCell.innerHTML = '<span class="query-status-badge query-status-failed">识别失败</span>';
+                    expressStatusCell.textContent = '无法识别快递公司';
+                    companyCell.textContent = '-';
+                    
+                    await logQuery(expressNumber, mobile, '', 'failed', '识别失败', null);
+                    showToast('无法识别快递公司，请检查单号', 'error');
+                    
                 } else {
-                    // 查询失败
+                    console.log('⚠️ 其他错误');
                     statusCell.innerHTML = '<span class="query-status-badge query-status-failed">查询失败</span>';
                     expressStatusCell.textContent = result.msg || '查询失败';
                     companyCell.textContent = '-';
@@ -2349,12 +2503,37 @@
                     showToast('查询失败：' + (result.msg || '未知错误'), 'error');
                 }
                 
+                console.log('═══════════════════════════════════════');
+                console.log('✅ 查询流程完成');
+                console.log('═══════════════════════════════════════');
+                
             } catch (error) {
-                console.error('查询失败:', error);
+                console.error('═══════════════════════════════════════');
+                console.error('❌ 查询失败');
+                console.error('═══════════════════════════════════════');
+                console.error('错误类型:', error.name);
+                console.error('错误消息:', error.message);
+                console.error('错误堆栈:', error.stack);
+                
                 statusCell.innerHTML = '<span class="query-status-badge query-status-failed">查询失败</span>';
-                expressStatusCell.textContent = '网络错误';
+                expressStatusCell.textContent = error.message || '网络错误';
                 companyCell.textContent = '-';
-                showToast('查询失败：' + error.message, 'error');
+                
+                // 显示友好的错误提示
+                let errorMsg = '查询失败：';
+                if (error.message.includes('AppCode')) {
+                    errorMsg += '\n请检查阿里云 AppCode 配置';
+                } else if (error.message.includes('认证')) {
+                    errorMsg += '\nAppCode 认证失败，请检查是否正确';
+                } else if (error.message.includes('欠费')) {
+                    errorMsg += '\n可能是 API 服务欠费';
+                } else if (error.message.includes('网络')) {
+                    errorMsg += '\n网络连接失败';
+                } else {
+                    errorMsg += '\n' + error.message;
+                }
+                
+                showToast(errorMsg, 'error');
             }
         }
 
