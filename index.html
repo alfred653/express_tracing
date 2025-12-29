@@ -449,7 +449,6 @@
             background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
         }
 
-        /* 没有状态码时的默认样式 */
         .express-status:not([class*="status-"]) {
             background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
         }
@@ -804,10 +803,7 @@
             font-weight: 600;
         }
 
-        /* ========================================
-           历史记录区域样式（新增）
-           ======================================== */
-        
+        /* 历史记录区域样式 */
         .history-section {
             display: none;
             animation: fadeIn 0.3s ease;
@@ -911,10 +907,7 @@
             color: #999;
         }
 
-        /* ========================================
-           简化充值弹窗样式
-           ======================================== */
-        
+        /* 简化充值弹窗样式 */
         .recharge-modal {
             display: none;
             position: fixed;
@@ -1022,11 +1015,12 @@
         /* 响应式设计 */
         @media (max-width: 768px) {
             .container {
-                margin: 10px;
+                padding: 10px;
             }
 
             #unifiedLoginContainer {
                 padding: 40px 20px;
+                margin: 50px auto;
             }
 
             .login-title {
@@ -1047,16 +1041,13 @@
                 padding: 8px;
             }
 
-            .logistics-timeline {
-                padding-left: 20px;
-            }
-
             .logistics-header {
                 flex-direction: column;
             }
 
             .logistics-header-right {
                 text-align: left;
+                margin-top: 10px;
             }
 
             .action-buttons {
@@ -1082,8 +1073,8 @@
     </style>
 </head>
 <body>
-    <!-- 统一登录界面 -->
     <div class="container">
+        <!-- 统一登录界面 -->
         <div id="unifiedLoginContainer">
             <h1 class="login-title">📦 快递查询系统</h1>
             
@@ -1126,9 +1117,7 @@
             <div class="header">
                 <h1>用户中心</h1>
                 <div class="header-buttons">
-                    <button class="btn-recharge" onclick="openRechargeModal()">
-                        💰 充值
-                    </button>
+                    <button class="btn-recharge" onclick="openRechargeModal()">💰 充值</button>
                     <button class="logout-btn" onclick="logout()">退出登录</button>
                 </div>
             </div>
@@ -1167,21 +1156,11 @@
                 
                 <!-- 操作按钮组 -->
                 <div class="action-buttons">
-                    <button class="btn-add" onclick="showQuerySection()">
-                        ➕ 添加查询
-                    </button>
-                    <button class="btn-export" onclick="exportToExcel()" id="exportBtn">
-                        📊 导出Excel
-                    </button>
-                    <button class="btn-batch" onclick="batchQuery()">
-                        🚀 批量查询
-                    </button>
-                    <button class="btn-clear" onclick="clearAllRows()">
-                        🗑️ 清空所有
-                    </button>
-                    <button class="btn-history" onclick="showHistorySection()">
-                        📜 查询历史
-                    </button>
+                    <button class="btn-add" onclick="showQuerySection()">➕ 添加查询</button>
+                    <button class="btn-export" onclick="exportToExcel()">📊 导出Excel</button>
+                    <button class="btn-batch" onclick="batchQuery()">🚀 批量查询</button>
+                    <button class="btn-clear" onclick="clearAllRows()">🗑️ 清空所有</button>
+                    <button class="btn-history" onclick="showHistorySection()">📜 查询历史</button>
                 </div>
                 
                 <!-- 查询表格区域 -->
@@ -1197,15 +1176,12 @@
                                 <th style="width: 18%">操作</th>
                             </tr>
                         </thead>
-                        <tbody id="queryTableBody">
-                            <!-- 动态添加行 -->
-                        </tbody>
+                        <tbody id="queryTableBody"></tbody>
                     </table>
                 </div>
 
                 <!-- 历史记录区域 -->
                 <div id="historySection" class="history-section">
-                    <!-- 统计卡片 -->
                     <div class="history-stats">
                         <div class="stat-card">
                             <div class="stat-label">总查询次数</div>
@@ -1221,7 +1197,6 @@
                         </div>
                     </div>
 
-                    <!-- 筛选器 -->
                     <div class="history-filters">
                         <div class="filter-group">
                             <label>快递单号：</label>
@@ -1243,7 +1218,6 @@
                         <button class="btn-export" onclick="exportHistoryToExcel()">📊 导出历史</button>
                     </div>
 
-                    <!-- 历史记录表格 -->
                     <table class="history-table">
                         <thead>
                             <tr>
@@ -1256,9 +1230,7 @@
                                 <th style="width: 20%">操作</th>
                             </tr>
                         </thead>
-                        <tbody id="historyTableBody">
-                            <!-- 动态添加历史记录 -->
-                        </tbody>
+                        <tbody id="historyTableBody"></tbody>
                     </table>
                 </div>
             </div>
@@ -1271,18 +1243,12 @@
                 <button class="logout-btn" onclick="logout()">退出登录</button>
             </div>
 
-            <!-- 用户管理 -->
             <div class="query-section">
                 <h2 class="section-title">👥 用户管理</h2>
                 
-                <!-- 管理员导出按钮 -->
                 <div class="action-buttons">
-                    <button class="btn-export" onclick="exportUsersToExcel()">
-                        📊 导出用户数据
-                    </button>
-                    <button class="btn-export" onclick="exportAllLogsToExcel()">
-                        📋 导出查询日志
-                    </button>
+                    <button class="btn-export" onclick="exportUsersToExcel()">📊 导出用户数据</button>
+                    <button class="btn-export" onclick="exportAllLogsToExcel()">📋 导出查询日志</button>
                 </div>
                 
                 <table class="admin-table">
@@ -1298,9 +1264,7 @@
                             <th>操作</th>
                         </tr>
                     </thead>
-                    <tbody id="adminUsersTableBody">
-                        <!-- 动态添加用户数据 -->
-                    </tbody>
+                    <tbody id="adminUsersTableBody"></tbody>
                 </table>
             </div>
         </div>
@@ -1343,6 +1307,17 @@
 
     <script>
         // ========================================
+        // 全局变量声明（先声明，后初始化）
+        // ========================================
+        let supabaseClient = null;
+        let currentUser = null;
+        let authToken = localStorage.getItem('authToken');
+        let queryRowCounter = 0;
+        let queryDataCache = {};
+        let historyData = [];
+        let filteredHistoryData = [];
+
+        // ========================================
         // Supabase 配置（重要：替换为你的实际配置）
         // ========================================
         const SUPABASE_CONFIG = {
@@ -1351,23 +1326,40 @@
         };
 
         // 阿里云快递查询API配置
-        const ALIYUN_APPCODE = '你的AppCode';  // 🔴 请替换为你的AppCode
-
-        // 初始化Supabase客户端
-        const supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+        const ALIYUN_APPCODE = '8c02c90948e246a994147ed55109955c';
 
         // ========================================
-        // 全局变量
+        // 初始化 Supabase 客户端（延迟初始化）
         // ========================================
-        let currentUser = null;
-        let authToken = localStorage.getItem('authToken');
-        let queryRowCounter = 0;
-        let queryDataCache = {};
-        
-        // 历史记录相关全局变量
-        let historyData = [];
-        let filteredHistoryData = [];
+        function initSupabase() {
+            try {
+                if (typeof window.supabase === 'undefined') {
+                    console.error('❌ Supabase 库未加载！');
+                    showToast('系统初始化失败，请刷新页面重试', 'error');
+                    return false;
+                }
+                
+                supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+                console.log('✅ Supabase 客户端初始化成功');
+                return true;
+            } catch (error) {
+                console.error('❌ Supabase 初始化失败:', error);
+                showToast('系统初始化失败：' + error.message, 'error');
+                return false;
+            }
+        }
 
+        // ========================================
+        // 检查 Supabase 是否已初始化
+        // ========================================
+        function checkSupabaseInit() {
+            if (!supabaseClient) {
+                console.error('❌ Supabase 客户端未初始化！');
+                showToast('系统未初始化，请刷新页面', 'error');
+                return false;
+            }
+            return true;
+        }
         // ========================================
         // 工具函数：显示/隐藏加载动画
         // ========================================
@@ -1408,14 +1400,12 @@
         // ========================================
         function formatDate(dateString) {
             if (!dateString) return '-';
-            
             const date = new Date(dateString);
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
             const hours = String(date.getHours()).padStart(2, '0');
             const minutes = String(date.getMinutes()).padStart(2, '0');
-            
             return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes;
         }
 
@@ -1424,7 +1414,6 @@
         // ========================================
         function formatTimestamp(timestamp) {
             if (!timestamp) return '';
-            
             const date = new Date(timestamp);
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -1432,7 +1421,6 @@
             const hours = String(date.getHours()).padStart(2, '0');
             const minutes = String(date.getMinutes()).padStart(2, '0');
             const seconds = String(date.getSeconds()).padStart(2, '0');
-            
             return year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
         }
 
@@ -1474,6 +1462,8 @@
         // 用户登录/注册
         // ========================================
         async function handleUserLogin() {
+            if (!checkSupabaseInit()) return;
+            
             const phone = document.getElementById('loginUserPhone').value.trim();
             
             if (!phone || !/^1[3-9]\d{9}$/.test(phone)) {
@@ -1482,6 +1472,8 @@
             }
             
             try {
+                showLoading('正在登录...');
+                
                 const queryResult = await supabaseClient
                     .from('users')
                     .select('*')
@@ -1513,13 +1505,16 @@
                     if (insertResult.error) throw insertResult.error;
                     
                     currentUser = insertResult.data;
+                    hideLoading();
                     showToast('注册成功！赠送1次试用额度', 'success');
                 } else {
                     if (existUser.disabled) {
+                        hideLoading();
                         showToast('账户已被停用，请联系管理员', 'error');
                         return;
                     }
                     currentUser = existUser;
+                    hideLoading();
                     showToast('登录成功！', 'success');
                 }
                 
@@ -1535,6 +1530,7 @@
                 
             } catch (error) {
                 console.error('登录失败:', error);
+                hideLoading();
                 showToast('登录失败：' + error.message, 'error');
             }
         }
@@ -1607,6 +1603,7 @@
         // 刷新用户信息
         // ========================================
         async function refreshUserInfo() {
+            if (!checkSupabaseInit()) return;
             if (!authToken || authToken === 'admin') return;
             
             try {
@@ -1626,15 +1623,12 @@
         }
 
         // ========================================
-        // 简化充值功能：打开充值弹窗
+        // 简化充值功能
         // ========================================
         function openRechargeModal() {
             document.getElementById('rechargeModal').classList.add('active');
         }
 
-        // ========================================
-        // 简化充值功能：关闭充值弹窗
-        // ========================================
         function closeRechargeModal() {
             document.getElementById('rechargeModal').classList.remove('active');
         }
@@ -1660,6 +1654,7 @@
         // 历史记录功能：加载历史数据
         // ========================================
         async function loadHistoryData() {
+            if (!checkSupabaseInit()) return;
             if (!currentUser) return;
             
             try {
@@ -1677,10 +1672,7 @@
                 historyData = result.data || [];
                 filteredHistoryData = historyData;
                 
-                // 更新统计数据
                 updateHistoryStats();
-                
-                // 渲染历史记录表格
                 renderHistoryTable();
                 
                 hideLoading();
@@ -1706,7 +1698,7 @@
         }
 
         // ========================================
-        // 历史记录功能：渲染历史记录表格（增强版）
+        // 历史记录功能：渲染历史记录表格
         // ========================================
         function renderHistoryTable() {
             const tbody = document.getElementById('historyTableBody');
@@ -1728,12 +1720,10 @@
                 const row = document.createElement('tr');
                 row.setAttribute('data-history-index', i);
                 
-                // 解析物流数据获取状态码
                 let statusCode = '';
                 let expressStatusHTML = '-';
                 
                 if (item.express_status) {
-                    // 尝试从物流数据中获取状态码
                     if (item.logistics_data) {
                         try {
                             const logisticsData = typeof item.logistics_data === 'string' ? 
@@ -1744,7 +1734,6 @@
                         }
                     }
                     
-                    // 生成带样式的快递状态
                     expressStatusHTML = '<span class="express-status status-' + statusCode + '">' + 
                         item.express_status + '</span>';
                 } else {
@@ -1801,6 +1790,7 @@
             updateHistoryStats();
             renderHistoryTable();
         }
+
         // ========================================
         // 历史记录功能：显示历史详情
         // ========================================
@@ -1816,7 +1806,6 @@
                 const data = typeof item.logistics_data === 'string' ? 
                     JSON.parse(item.logistics_data) : item.logistics_data;
                 
-                // 找到当前行
                 const tbody = document.getElementById('historyTableBody');
                 const rows = tbody.querySelectorAll('tr[data-history-index]');
                 let currentRow = null;
@@ -1830,14 +1819,12 @@
                 
                 if (!currentRow) return;
                 
-                // 检查是否已经展开
                 const nextRow = currentRow.nextElementSibling;
                 if (nextRow && nextRow.classList && nextRow.classList.contains('logistics-detail-row')) {
                     nextRow.remove();
                     return;
                 }
                 
-                // 创建详情行
                 const detailRow = document.createElement('tr');
                 detailRow.className = 'logistics-detail-row';
                 
@@ -1865,7 +1852,6 @@
                 return;
             }
             
-            // 检查剩余额度
             if (currentUser.total_quota - currentUser.used_quota <= 0) {
                 showToast('查询额度不足，请充值后再试', 'error');
                 openRechargeModal();
@@ -1879,7 +1865,6 @@
             try {
                 showLoading('正在查询中...');
                 
-                // 构建请求参数
                 const formData = new URLSearchParams();
                 formData.append('number', item.express_number);
                 if (item.mobile) {
@@ -1887,11 +1872,10 @@
                 }
                 formData.append('expressCode', '');
                 
-                // 发起请求
                 const response = await fetch('https://jmexpresv2.market.alicloudapi.com/express/query-v2', {
                     method: 'POST',
                     headers: {
-                        'Authorization': '8c02c90948e246a994147ed55109955c ' + ALIYUN_APPCODE,
+                        'Authorization': 'APPCODE ' + ALIYUN_APPCODE,
                         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
                     },
                     body: formData.toString()
@@ -1899,13 +1883,9 @@
                 
                 const result = await response.json();
                 
-                console.log('再次查询API返回结果:', result);
-                
-                // 处理返回结果
                 if (result.code === 200 && result.data) {
                     const data = result.data;
                     
-                    // 转换为统一格式
                     const unifiedData = {
                         express_number: data.number,
                         company: data.expressCompanyName,
@@ -1921,7 +1901,6 @@
                         list: []
                     };
                     
-                    // 转换物流轨迹数据
                     if (data.logisticsTraceDetails && data.logisticsTraceDetails.length > 0) {
                         unifiedData.list = data.logisticsTraceDetails.map(function(item) {
                             return {
@@ -1936,10 +1915,7 @@
                         });
                     }
                     
-                    // 扣除额度
                     await updateUserQuota();
-                    
-                    // 记录查询日志
                     await logQuery(
                         item.express_number,
                         item.mobile || '',
@@ -1951,23 +1927,12 @@
                     
                     hideLoading();
                     showToast('查询成功！', 'success');
-                    
-                    // 重新加载历史记录
                     await loadHistoryData();
                     
                 } else {
                     hideLoading();
                     showToast('查询失败：' + (result.msg || '未知错误'), 'error');
-                    
-                    // 记录失败日志
-                    await logQuery(
-                        item.express_number,
-                        item.mobile || '',
-                        '',
-                        'failed',
-                        result.msg || '',
-                        null
-                    );
+                    await logQuery(item.express_number, item.mobile || '', '', 'failed', result.msg || '', null);
                 }
                 
             } catch (error) {
@@ -1981,6 +1946,8 @@
         // 历史记录功能：删除历史记录
         // ========================================
         async function deleteHistoryRecord(index) {
+            if (!checkSupabaseInit()) return;
+            
             const item = filteredHistoryData[index];
             
             if (!confirm('确定要删除这条查询记录吗？\n快递单号：' + (item.express_number || '未知'))) {
@@ -1999,8 +1966,6 @@
                 
                 hideLoading();
                 showToast('删除成功！', 'success');
-                
-                // 重新加载历史记录
                 await loadHistoryData();
                 
             } catch (error) {
@@ -2011,7 +1976,7 @@
         }
 
         // ========================================
-        // 历史记录功能：导出历史记录到Excel（增强版 - 包含完整物流信息）
+        // 历史记录功能：导出历史记录到Excel
         // ========================================
         async function exportHistoryToExcel() {
             if (filteredHistoryData.length === 0) {
@@ -2024,9 +1989,6 @@
                 
                 const wb = XLSX.utils.book_new();
                 
-                // ========================================
-                // Sheet 1: 查询概览
-                // ========================================
                 const summaryData = [];
                 summaryData.push(['查询历史记录导出']);
                 summaryData.push(['导出时间', new Date().toLocaleString('zh-CN')]);
@@ -2055,15 +2017,11 @@
                 
                 XLSX.utils.book_append_sheet(wb, summaryWs, '查询概览');
                 
-                // ========================================
-                // Sheet 2-N: 每个快递的详细物流信息
-                // ========================================
                 let detailSheetCount = 0;
                 
                 for (let i = 0; i < filteredHistoryData.length; i++) {
                     const item = filteredHistoryData[i];
                     
-                    // 只为有物流数据的记录创建详细表
                     if (!item.logistics_data) continue;
                     
                     try {
@@ -2071,21 +2029,17 @@
                             JSON.parse(item.logistics_data) : item.logistics_data;
                         
                         const detailData = [];
-                        
-                        // 基本信息
                         detailData.push(['快递详细信息']);
                         detailData.push(['查询时间', formatDate(item.query_time || item.created_at)]);
                         detailData.push(['快递单号', logisticsData.express_number || item.express_number || '']);
                         detailData.push(['快递公司', logisticsData.company || item.company_name || '']);
                         detailData.push(['快递状态', logisticsData.status || item.express_status || '']);
                         
-                        // 快递员信息
                         if (logisticsData.courier || logisticsData.courier_phone) {
                             detailData.push(['快递员', logisticsData.courier || '']);
                             detailData.push(['联系电话', logisticsData.courier_phone || '']);
                         }
                         
-                        // 耗时信息
                         if (logisticsData.take_time) {
                             detailData.push(['配送耗时', logisticsData.take_time]);
                         }
@@ -2094,7 +2048,6 @@
                         detailData.push(['物流轨迹']);
                         detailData.push(['时间', '物流信息', '所在地']);
                         
-                        // 物流轨迹详情
                         const logisticsList = logisticsData.list || logisticsData.data || [];
                         if (logisticsList && logisticsList.length > 0) {
                             for (let j = 0; j < logisticsList.length; j++) {
@@ -2109,20 +2062,13 @@
                             detailData.push(['', '暂无物流轨迹信息', '']);
                         }
                         
-                        // 创建工作表
                         const detailWs = XLSX.utils.aoa_to_sheet(detailData);
-                        detailWs['!cols'] = [
-                            { wch: 20 }, { wch: 60 }, { wch: 20 }
-                        ];
+                        detailWs['!cols'] = [{ wch: 20 }, { wch: 60 }, { wch: 20 }];
                         
-                        // 生成工作表名称（使用快递单号，限制长度）
                         detailSheetCount++;
                         let sheetName = (logisticsData.express_number || item.express_number || '单号' + detailSheetCount);
-                        
-                        // Excel工作表名称限制：最多31个字符，不能包含特殊字符
                         sheetName = sheetName.replace(/[:\\\/\?\*\[\]]/g, '').substring(0, 25);
                         
-                        // 如果名称重复，添加序号
                         let finalSheetName = sheetName;
                         let suffix = 1;
                         while (wb.SheetNames.indexOf(finalSheetName) !== -1) {
@@ -2138,23 +2084,13 @@
                     }
                 }
                 
-                // ========================================
-                // 生成并下载文件
-                // ========================================
-                const fileName = '查询历史_' + 
-                    currentUser.user_name + '_' + 
-                    new Date().toLocaleDateString('zh-CN').replace(/\//g, '-') + 
-                    '.xlsx';
+                const fileName = '查询历史_' + currentUser.user_name + '_' + 
+                    new Date().toLocaleDateString('zh-CN').replace(/\//g, '-') + '.xlsx';
                 
                 XLSX.writeFile(wb, fileName);
                 
                 hideLoading();
-                
-                const message = '导出成功！\n' +
-                    '概览记录：' + filteredHistoryData.length + ' 条\n' +
-                    '详细物流：' + detailSheetCount + ' 个';
-                
-                showToast(message, 'success');
+                showToast('导出成功！\n概览记录：' + filteredHistoryData.length + ' 条\n详细物流：' + detailSheetCount + ' 个', 'success');
                 
             } catch (error) {
                 console.error('导出失败:', error);
@@ -2214,7 +2150,7 @@
         }
 
         // ========================================
-        // 用户查询：单个查询（阿里云快递查询API）
+        // 用户查询：单个查询
         // ========================================
         async function querySingleExpress(rowId) {
             const expressNumber = document.getElementById('expressNumber-' + rowId).value.trim();
@@ -2225,7 +2161,6 @@
                 return;
             }
             
-            // 检查剩余额度
             if (currentUser.total_quota - currentUser.used_quota <= 0) {
                 showToast('查询额度不足，请充值后再试', 'error');
                 openRechargeModal();
@@ -2241,20 +2176,17 @@
             statusCell.innerHTML = '<span class="query-status-badge query-status-querying">查询中...</span>';
             
             try {
-                // 构建请求参数
                 const formData = new URLSearchParams();
                 formData.append('number', expressNumber);
                 if (mobile) {
                     formData.append('mobile', mobile);
                 }
-                // expressCode 留空，让API自动识别快递公司
                 formData.append('expressCode', '');
                 
-                // 发起请求
                 const response = await fetch('https://jmexpresv2.market.alicloudapi.com/express/query-v2', {
                     method: 'POST',
                     headers: {
-                        'Authorization': '8c02c90948e246a994147ed55109955c ' + ALIYUN_APPCODE,
+                        'Authorization': 'APPCODE ' + ALIYUN_APPCODE,
                         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
                     },
                     body: formData.toString()
@@ -2262,14 +2194,9 @@
                 
                 const result = await response.json();
                 
-                console.log('API返回结果:', result);
-                
-                // 处理返回结果
                 if (result.code === 200 && result.data) {
-                    // 查询成功
                     const data = result.data;
                     
-                    // 转换为统一格式存储
                     const unifiedData = {
                         express_number: data.number,
                         company: data.expressCompanyName,
@@ -2285,7 +2212,6 @@
                         list: []
                     };
                     
-                    // 转换物流轨迹数据
                     if (data.logisticsTraceDetails && data.logisticsTraceDetails.length > 0) {
                         unifiedData.list = data.logisticsTraceDetails.map(function(item) {
                             return {
@@ -2300,10 +2226,8 @@
                         });
                     }
                     
-                    // 缓存数据
                     queryDataCache[rowId] = unifiedData;
                     
-                    // 更新界面
                     statusCell.innerHTML = '<span class="query-status-badge query-status-success">查询成功</span>';
                     expressStatusCell.innerHTML = '<span class="express-status status-' + data.logisticsStatus + '">' + data.logisticsStatusDesc + '</span>';
                     companyCell.innerHTML = '<div style="display: flex; align-items: center; gap: 8px;">' +
@@ -2315,23 +2239,12 @@
                         '<button class="btn-query btn-detail" onclick="showLogisticsDetail(' + rowId + ')">详情</button>' +
                         '<button class="btn-query btn-delete" onclick="deleteQueryRow(' + rowId + ')">删除</button>';
                     
-                    // 扣除额度
                     await updateUserQuota();
-                    
-                    // 记录查询日志
-                    await logQuery(
-                        expressNumber, 
-                        mobile, 
-                        data.expressCompanyName, 
-                        'success', 
-                        data.logisticsStatusDesc, 
-                        unifiedData
-                    );
+                    await logQuery(expressNumber, mobile, data.expressCompanyName, 'success', data.logisticsStatusDesc, unifiedData);
                     
                     showToast('查询成功！', 'success');
                     
                 } else if (result.code === 201) {
-                    // 暂无物流信息
                     statusCell.innerHTML = '<span class="query-status-badge query-status-failed">暂无记录</span>';
                     expressStatusCell.textContent = '暂无物流信息';
                     companyCell.textContent = '-';
@@ -2340,7 +2253,6 @@
                     showToast('暂无物流信息', 'error');
                     
                 } else {
-                    // 查询失败
                     statusCell.innerHTML = '<span class="query-status-badge query-status-failed">查询失败</span>';
                     expressStatusCell.textContent = result.msg || '查询失败';
                     companyCell.textContent = '-';
@@ -2399,7 +2311,6 @@
                     failCount++;
                 }
                 
-                // 延迟500ms，避免请求过快
                 if (i < pendingRows.length - 1) {
                     await new Promise(resolve => setTimeout(resolve, 500));
                 }
@@ -2410,17 +2321,15 @@
         }
 
         // ========================================
-        // 生成物流详情HTML（兼容阿里云API格式）
+        // 生成物流详情HTML
         // ========================================
         function generateLogisticsDetailHTML(data) {
             let detailHTML = '<div class="logistics-details">';
             
-            // 物流头部信息
             detailHTML += '<div class="logistics-header">';
             detailHTML += '<div class="logistics-header-left">';
             detailHTML += '<div class="logistics-title">📦 物流详情</div>';
             
-            // 快递公司信息（带Logo）
             detailHTML += '<div class="logistics-company">';
             if (data.company_logo) {
                 detailHTML += '<img src="' + data.company_logo + '" class="company-logo" alt="logo">';
@@ -2430,7 +2339,6 @@
             
             detailHTML += '<div class="logistics-meta">单号：' + (data.express_number || data.nu || '-') + '</div>';
             
-            // 快递员信息
             if (data.courier || data.courier_phone) {
                 detailHTML += '<div class="logistics-meta courier-info">';
                 if (data.courier) {
@@ -2444,21 +2352,17 @@
             
             detailHTML += '</div>';
             
-            // 物流状态
             detailHTML += '<div class="logistics-header-right">';
             detailHTML += '<span class="express-status status-' + (data.status_code || '') + '">' + (data.status || '运输中') + '</span>';
             
-            // 耗时信息
             if (data.take_time) {
                 detailHTML += '<div style="font-size: 12px; color: #999; margin-top: 5px;">⏱️ ' + data.take_time + '</div>';
             }
             detailHTML += '</div>';
             detailHTML += '</div>';
             
-            // 获取物流列表
             let logisticsList = data.list || data.data || [];
             
-            // 最新物流信息框
             if (logisticsList && logisticsList.length > 0) {
                 const latestInfo = logisticsList[0];
                 detailHTML += '<div class="logistics-info-box">';
@@ -2479,7 +2383,6 @@
                 detailHTML += '</div>';
             }
             
-            // 物流时间线
             detailHTML += '<div class="logistics-timeline">';
             detailHTML += '<div class="timeline-title">📍 物流轨迹</div>';
             
@@ -2487,7 +2390,6 @@
                 for (let i = 0; i < logisticsList.length; i++) {
                     const item = logisticsList[i];
                     
-                    // 获取物流状态图标
                     let statusIcon = '📦';
                     const statusCode = item.status_code || item.logisticsStatus;
                     if (statusCode === 'ACCEPT') statusIcon = '📥';
@@ -2533,7 +2435,6 @@
             const row = document.getElementById('queryRow-' + rowId);
             const existingDetail = row.nextElementSibling;
             
-            // 如果已经展开，则收起
             if (existingDetail && existingDetail.classList.contains('logistics-detail-row')) {
                 existingDetail.remove();
                 return;
@@ -2570,7 +2471,6 @@
                 
                 const wb = XLSX.utils.book_new();
                 
-                // 创建概览表
                 const summaryData = [];
                 summaryData.push(['快递查询记录']);
                 summaryData.push(['导出时间', new Date().toLocaleString('zh-CN')]);
@@ -2598,7 +2498,6 @@
                 ];
                 XLSX.utils.book_append_sheet(wb, summaryWs, '查询概览');
                 
-                // 为每个快递创建详细表
                 for (const rowId in queryDataCache) {
                     const data = queryDataCache[rowId];
                     const detailData = [];
@@ -2646,6 +2545,8 @@
         // 更新用户额度
         // ========================================
         async function updateUserQuota() {
+            if (!checkSupabaseInit()) return;
+            
             try {
                 const result = await supabaseClient
                     .from('users')
@@ -2665,11 +2566,12 @@
         }
 
         // ========================================
-        // 记录查询日志（包含物流数据）
+        // 记录查询日志
         // ========================================
         async function logQuery(expressNumber, mobile, companyName, status, expressStatus, logisticsData) {
+            if (!checkSupabaseInit()) return;
+            
             try {
-                // 将物流数据转换为JSON字符串
                 const logisticsJSON = logisticsData ? JSON.stringify(logisticsData) : null;
                 
                 await supabaseClient
@@ -2693,6 +2595,8 @@
         // 管理员：加载所有用户
         // ========================================
         async function loadAdminData() {
+            if (!checkSupabaseInit()) return;
+            
             try {
                 const result = await supabaseClient
                     .from('users')
@@ -2755,6 +2659,8 @@
         // 管理员：修改用户额度
         // ========================================
         async function editUserQuota(userId, currentQuota) {
+            if (!checkSupabaseInit()) return;
+            
             const newQuota = prompt('请输入新的总额度:', currentQuota);
             
             if (newQuota === null) return;
@@ -2784,6 +2690,8 @@
         // 管理员：停用/启用用户
         // ========================================
         async function toggleUserStatus(userId, currentStatus) {
+            if (!checkSupabaseInit()) return;
+            
             const action = currentStatus ? '启用' : '停用';
             
             if (!confirm('确定要' + action + '该用户吗？')) {
@@ -2810,6 +2718,8 @@
         // 管理员：修改用户名
         // ========================================
         async function editUserName(userId, currentName) {
+            if (!checkSupabaseInit()) return;
+            
             const newName = prompt('请输入新的用户名:', currentName);
             
             if (newName === null || newName.trim() === '') return;
@@ -2834,6 +2744,8 @@
         // 管理员：导出用户数据
         // ========================================
         async function exportUsersToExcel() {
+            if (!checkSupabaseInit()) return;
+            
             try {
                 showLoading('正在导出用户数据...');
                 
@@ -2895,9 +2807,11 @@
         }
 
         // ========================================
-        // 管理员：导出查询日志（增强版 - 包含完整物流信息）
+        // 管理员：导出查询日志
         // ========================================
         async function exportAllLogsToExcel() {
+            if (!checkSupabaseInit()) return;
+            
             try {
                 showLoading('正在导出查询日志...');
                 
@@ -2919,9 +2833,6 @@
                 
                 const wb = XLSX.utils.book_new();
                 
-                // ========================================
-                // Sheet 1: 查询日志概览
-                // ========================================
                 const summaryData = [];
                 summaryData.push(['查询日志导出']);
                 summaryData.push(['导出时间', new Date().toLocaleString('zh-CN')]);
@@ -2934,7 +2845,8 @@
                     summaryData.push([
                         formatDate(log.query_time || log.created_at),
                         log.users ? log.users.phone : '',
-                        log.users ? log.users.user_name : '',
+                        log.users ? log
+.user_name : '',
                         log.express_number || '',
                         log.mobile || '',
                         log.company_name || '',
@@ -2951,15 +2863,11 @@
                 
                 XLSX.utils.book_append_sheet(wb, summaryWs, '查询日志概览');
                 
-                // ========================================
-                // Sheet 2: 详细物流信息统计
-                // ========================================
                 let detailSheetCount = 0;
                 
                 for (let i = 0; i < logs.length; i++) {
                     const log = logs[i];
                     
-                    // 只为有物流数据的记录创建详细表
                     if (!log.logistics_data || log.status !== 'success') continue;
                     
                     try {
@@ -2968,14 +2876,12 @@
                         
                         const detailData = [];
                         
-                        // 用户信息
                         detailData.push(['查询用户信息']);
                         detailData.push(['用户手机号', log.users ? log.users.phone : '']);
                         detailData.push(['用户名', log.users ? log.users.user_name : '']);
                         detailData.push(['查询时间', formatDate(log.query_time || log.created_at)]);
                         detailData.push([]);
                         
-                        // 快递信息
                         detailData.push(['快递详细信息']);
                         detailData.push(['快递单号', logisticsData.express_number || log.express_number || '']);
                         detailData.push(['快递公司', logisticsData.company || log.company_name || '']);
@@ -2994,7 +2900,6 @@
                         detailData.push(['物流轨迹']);
                         detailData.push(['时间', '物流信息', '所在地']);
                         
-                        // 物流轨迹
                         const logisticsList = logisticsData.list || logisticsData.data || [];
                         if (logisticsList && logisticsList.length > 0) {
                             for (let j = 0; j < logisticsList.length; j++) {
@@ -3009,21 +2914,17 @@
                             detailData.push(['', '暂无物流轨迹信息', '']);
                         }
                         
-                        // 创建工作表
                         const detailWs = XLSX.utils.aoa_to_sheet(detailData);
                         detailWs['!cols'] = [
                             { wch: 20 }, { wch: 60 }, { wch: 20 }
                         ];
                         
-                        // 生成工作表名称
                         detailSheetCount++;
                         const userName = log.users ? log.users.user_name : '用户';
                         let sheetName = userName + '_' + (logisticsData.express_number || log.express_number || '单号' + detailSheetCount);
                         
-                        // 清理并限制长度
                         sheetName = sheetName.replace(/[:\\\/\?\*\[\]]/g, '').substring(0, 25);
                         
-                        // 避免重名
                         let finalSheetName = sheetName;
                         let suffix = 1;
                         while (wb.SheetNames.indexOf(finalSheetName) !== -1) {
@@ -3039,9 +2940,6 @@
                     }
                 }
                 
-                // ========================================
-                // 生成并下载文件
-                // ========================================
                 const fileName = '查询日志_' + 
                     new Date().toLocaleDateString('zh-CN').replace(/\//g, '-') + 
                     '.xlsx';
@@ -3064,27 +2962,64 @@
         }
 
         // ========================================
-        // 页面加载时检查登录状态
+        // 页面加载时初始化系统
         // ========================================
         window.addEventListener('DOMContentLoaded', async function() {
-            console.log('页面加载完成，检查登录状态...');
-            console.log('Supabase配置:', SUPABASE_CONFIG);
+            console.log('🚀 页面加载完成，开始初始化系统...');
             
-            // 检查Excel库是否加载成功
-            if (typeof XLSX === 'undefined') {
-                console.error('Excel库加载失败！');
-                showToast('Excel库加载失败，导出功能不可用', 'error');
-            } else {
-                console.log('Excel库加载成功，版本:', XLSX.version);
-            }
+            // 等待 Supabase 库加载
+            let retryCount = 0;
+            const maxRetries = 10;
+            
+            const waitForSupabase = setInterval(function() {
+                retryCount++;
+                
+                if (typeof window.supabase !== 'undefined') {
+                    clearInterval(waitForSupabase);
+                    console.log('✅ Supabase 库加载成功');
+                    
+                    // 初始化 Supabase 客户端
+                    if (!initSupabase()) {
+                        showToast('系统初始化失败，请刷新页面', 'error');
+                        return;
+                    }
+                    
+                    // 检查 Excel 库
+                    if (typeof XLSX === 'undefined') {
+                        console.error('❌ Excel库加载失败！');
+                        showToast('Excel库加载失败，导出功能不可用', 'error');
+                    } else {
+                        console.log('✅ Excel库加载成功，版本:', XLSX.version);
+                    }
+                    
+                    // 检查登录状态
+                    checkLoginStatus();
+                    
+                } else if (retryCount >= maxRetries) {
+                    clearInterval(waitForSupabase);
+                    console.error('❌ Supabase 库加载超时！');
+                    showToast('系统加载失败，请检查网络连接后刷新页面', 'error');
+                }
+            }, 200);
+        });
+
+        // ========================================
+        // 检查登录状态
+        // ========================================
+        async function checkLoginStatus() {
+            console.log('🔍 检查登录状态...');
             
             if (authToken && authToken !== 'admin') {
                 try {
+                    showLoading('正在加载用户信息...');
+                    
                     const result = await supabaseClient
                         .from('users')
                         .select('*')
                         .eq('id', parseInt(authToken))
                         .single();
+                    
+                    hideLoading();
                     
                     if (!result.error && result.data && !result.data.disabled) {
                         currentUser = result.data;
@@ -3093,13 +3028,15 @@
                         updateUserPanel();
                         showQuerySection();
                         addQueryRow();
-                        console.log('用户自动登录成功');
+                        console.log('✅ 用户自动登录成功');
                     } else {
                         localStorage.removeItem('authToken');
                         authToken = null;
+                        console.log('⚠️ 自动登录失败，请重新登录');
                     }
                 } catch (error) {
-                    console.error('自动登录失败:', error);
+                    console.error('❌ 自动登录失败:', error);
+                    hideLoading();
                     localStorage.removeItem('authToken');
                     authToken = null;
                 }
@@ -3107,9 +3044,11 @@
                 document.getElementById('unifiedLoginContainer').style.display = 'none';
                 document.getElementById('adminInterface').classList.add('active');
                 loadAdminData();
-                console.log('管理员自动登录成功');
+                console.log('✅ 管理员自动登录成功');
+            } else {
+                console.log('ℹ️ 未登录，显示登录界面');
             }
-        });
+        }
 
         // ========================================
         // 定时刷新用户信息（每30秒）
