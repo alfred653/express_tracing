@@ -1586,18 +1586,19 @@
                 <!-- 统计卡片 -->
                 <div class="history-stats">
                     <div class="stat-card">
-                        <div class="stat-label">总查询次数</div>
+                        <div class="stat-label">已查询单号总数</div>
                         <div class="stat-value" id="historyTotalCount">0</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-label">成功次数</div>
+                        <div class="stat-label">已签收总数</div>
                         <div class="stat-value" id="historySuccessCount">0</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-label">失败次数</div>
+                        <div class="stat-label">未签收总数</div>
                         <div class="stat-value" id="historyFailedCount">0</div>
                     </div>
                 </div>
+
 
                 <!-- 筛选器 -->
                 <div class="history-filters">
@@ -2836,7 +2837,7 @@
         }
 
         // ========================================
-        // 历史记录：加载数据（去重优化）
+        // 历史记录：加载数据（去重优化 + 统计优化）
         // ========================================
         async function loadHistoryData() {
             if (!checkSystemInit()) return;
@@ -2868,14 +2869,43 @@
                 historyData = Object.values(uniqueRecords);
                 filteredHistoryData = historyData;
                 
-                // 更新统计数据
-                const totalCount = historyData.length;
-                const successCount = historyData.filter(item => item.status === 'success').length;
-                const failedCount = historyData.filter(item => item.status === 'failed').length;
+                // 更新统计数据（新逻辑）
+                const totalCount = historyData.length; // 已查询单号总数
+                
+                // 统计已签收和未签收
+                let signedCount = 0;  // 已签收总数
+                let unsignedCount = 0; // 未签收总数
+                
+                historyData.forEach(item => {
+                    if (item.status === 'success' && item.logistics_data) {
+                        try {
+                            const logisticsData = typeof item.logistics_data === 'string' ? 
+                                JSON.parse(item.logistics_data) : item.logistics_data;
+                            
+                            // 判断是否已签收
+                            // logisticsStatus: 0-在途，1-揽收，2-疑难，3-签收，4-退签，5-派件，6-退回，7-转投等
+                            if (logisticsData.status_code === 3 || 
+                                (logisticsData.status && (
+                                    logisticsData.status.includes('已签收') || 
+                                    logisticsData.status.includes('已收货') ||
+                                    logisticsData.status.includes('签收')
+                                ))) {
+                                signedCount++;
+                            } else {
+                                unsignedCount++;
+                            }
+                        } catch (error) {
+                            console.error('解析物流数据失败:', error);
+                            unsignedCount++; // 解析失败的算作未签收
+                        }
+                    } else {
+                        unsignedCount++; // 查询失败的也算作未签收
+                    }
+                });
                 
                 document.getElementById('historyTotalCount').textContent = totalCount;
-                document.getElementById('historySuccessCount').textContent = successCount;
-                document.getElementById('historyFailedCount').textContent = failedCount;
+                document.getElementById('historySuccessCount').textContent = signedCount;
+                document.getElementById('historyFailedCount').textContent = unsignedCount;
                 
                 // 渲染表格
                 renderHistoryTable();
@@ -2888,6 +2918,7 @@
                 showToast('加载失败：' + error.message, 'error');
             }
         }
+
 
         // ========================================
         // 历史记录：渲染表格
