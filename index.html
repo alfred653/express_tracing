@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>快递查询系统 - 简约版</title>
+    <title>快递查询系统</title>
     
     <!-- 引入Supabase客户端 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1356,6 +1356,7 @@
             background: rgba(0, 0, 0, 0.5);
             border-radius: 12px;
             border: 1px solid var(--glass-border);
+            align-items: end; /* 🔥 关键修改：让所有列底部对齐 */
         }
 
         .filter-group {
@@ -1370,6 +1371,7 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 1px;
+            min-height: 16px; /* 🔥 确保标签高度一致 */
         }
 
         .filter-group input,
@@ -1389,6 +1391,13 @@
             border-color: rgba(255, 255, 255, 0.3);
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
         }
+
+        /* 🔥 新增：筛选按钮样式优化 */
+        .filter-group .btn {
+            margin: 0;
+            height: 42px; /* 与输入框高度一致 */
+        }
+
 
         .history-empty {
             text-align: center;
@@ -1778,9 +1787,11 @@
                             <option value="failed">失败</option>
                         </select>
                     </div>
-                    <div class="filter-group" style="display: flex; align-items: flex-end;">
-                        <button class="btn btn-primary" onclick="filterHistory()" style="width: 100%; margin: 0;">🔍 筛选</button>
+                    <div class="filter-group">
+                        <label>操作</label>
+                        <button class="btn btn-primary" onclick="filterHistory()" style="width: 100%;">🔍 筛选</button>
                     </div>
+
                 </div>
 
                 <!-- 历史记录表格 -->
