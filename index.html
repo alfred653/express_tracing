@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>快递查询跟踪</title>
+    <title>快递查询系统</title>
     
     <!-- 引入Supabase客户端 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1599,7 +1599,6 @@
                     </div>
                 </div>
 
-
                 <!-- 筛选器 -->
                 <div class="history-filters">
                     <div class="filter-group">
@@ -1732,7 +1731,8 @@
                     
                     <div class="form-group">
                         <label>确认密码</label>
-                        <input type="password" id="confirmPasswordSet" placeholder="请再次输入密码" maxlength="20">
+                        <input type="password"
+ id="confirmPasswordSet" placeholder="请再次输入密码" maxlength="20">
                     </div>
                 </div>
                 
@@ -1964,6 +1964,8 @@
         let isSystemInitialized = false;
         let adminTotalQuota = parseInt(localStorage.getItem('adminTotalQuota')) || 0;
         let adminPassword = localStorage.getItem('adminPassword') || 'admin123';
+        let initRetryCount = 0;
+        let maxRetryCount = 3;
 
         // ========================================
         // Supabase 配置
@@ -2152,52 +2154,88 @@
         }
 
         // ========================================
-        // 初始化 Supabase 客户端
+        // 初始化 Supabase 客户端（增强版）
         // ========================================
         function initSupabase() {
             return new Promise((resolve, reject) => {
                 try {
-                    console.log('🔄 开始初始化 Supabase...');
+                    console.log('🔄 开始初始化 Supabase... (尝试次数: ' + (initRetryCount + 1) + ')');
                     
-                    if (!SUPABASE_CONFIG.url || SUPABASE_CONFIG.url.includes('你的项目ID')) {
-                        reject(new Error('请先配置 Supabase URL'));
+                    // 检查配置
+                    if (!SUPABASE_CONFIG.url) {
+                        reject(new Error('Supabase URL 未配置'));
                         return;
                     }
                     
-                    if (!SUPABASE_CONFIG.key || SUPABASE_CONFIG.key.includes('你的anon-public密钥')) {
-                        reject(new Error('请先配置 Supabase Key'));
+                    if (!SUPABASE_CONFIG.key) {
+                        reject(new Error('Supabase Key 未配置'));
                         return;
                     }
                     
+                    // 检查 Supabase 库是否加载
                     if (typeof window.supabase === 'undefined') {
-                        reject(new Error('Supabase 库未加载'));
+                        console.warn('⚠️ Supabase 库未加载，等待加载...');
+                        
+                        // 等待库加载
+                        setTimeout(() => {
+                            if (typeof window.supabase !== 'undefined') {
+                                console.log('✅ Supabase 库加载成功');
+                                initSupabase().then(resolve).catch(reject);
+                            } else {
+                                reject(new Error('Supabase 库加载超时'));
+                            }
+                        }, 1000);
                         return;
                     }
                     
                     console.log('✅ Supabase 库已加载');
                     
-                    supabaseClient = window.supabase.createClient(
-                        SUPABASE_CONFIG.url, 
-                        SUPABASE_CONFIG.key
-                    );
-                    
-                    if (!supabaseClient) {
-                        reject(new Error('Supabase 客户端创建失败'));
-                        return;
+                    // 创建客户端
+                    try {
+                        supabaseClient = window.supabase.createClient(
+                            SUPABASE_CONFIG.url, 
+                            SUPABASE_CONFIG.key,
+                            {
+                                auth: {
+                                    persistSession: false
+                                }
+                            }
+                        );
+                        
+                        if (!supabaseClient) {
+                            reject(new Error('Supabase 客户端创建失败'));
+                            return;
+                        }
+                        
+                        console.log('✅ Supabase 客户端创建成功');
+                        
+                        // 测试连接
+                        testSupabaseConnection()
+                            .then(() => {
+                                isSystemInitialized = true;
+                                initRetryCount = 0;
+                                console.log('✅ Supabase 连接测试成功');
+                                resolve(true);
+                            })
+                            .catch((error) => {
+                                console.error('❌ Supabase 连接测试失败:', error);
+                                
+                                // 如果是网络错误，尝试重试
+                                if (initRetryCount < maxRetryCount) {
+                                    initRetryCount++;
+                                    console.log('🔄 准备重试初始化...');
+                                    setTimeout(() => {
+                                        initSupabase().then(resolve).catch(reject);
+                                    }, 2000);
+                                } else {
+                                    reject(error);
+                                }
+                            });
+                        
+                    } catch (createError) {
+                        console.error('❌ 创建客户端异常:', createError);
+                        reject(createError);
                     }
-                    
-                    console.log('✅ Supabase 客户端创建成功');
-                    
-                    testSupabaseConnection()
-                        .then(() => {
-                            isSystemInitialized = true;
-                            console.log('✅ Supabase 连接测试成功');
-                            resolve(true);
-                        })
-                        .catch((error) => {
-                            console.error('❌ Supabase 连接测试失败:', error);
-                            reject(error);
-                        });
                     
                 } catch (error) {
                     console.error('❌ Supabase 初始化异常:', error);
@@ -2207,16 +2245,23 @@
         }
 
         // ========================================
-        // 测试 Supabase 连接
+        // 测试 Supabase 连接（增强版）
         // ========================================
         async function testSupabaseConnection() {
             try {
                 console.log('🔍 测试 Supabase 连接...');
                 
-                const { data, error } = await supabaseClient
+                // 设置超时
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('连接超时')), 10000);
+                });
+                
+                const queryPromise = supabaseClient
                     .from('users')
                     .select('count')
                     .limit(1);
+                
+                const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
                 
                 if (error && error.code !== 'PGRST116') {
                     console.error('❌ 连接测试失败:', error);
@@ -2232,12 +2277,32 @@
         }
 
         // ========================================
-        // 检查系统是否已初始化
+        // 检查系统是否已初始化（增强版）
         // ========================================
         function checkSystemInit() {
             if (!isSystemInitialized || !supabaseClient) {
                 console.error('❌ 系统未初始化');
-                showToast('系统未初始化，请刷新页面', 'error');
+                console.log('调试信息:', {
+                    isSystemInitialized: isSystemInitialized,
+                    supabaseClient: !!supabaseClient,
+                    supabaseLibrary: typeof window.supabase !== 'undefined'
+                });
+                
+                showToast('系统初始化中，请稍候...', 'error');
+                
+                // 尝试重新初始化
+                if (initRetryCount < maxRetryCount) {
+                    initRetryCount++;
+                    initSupabase()
+                        .then(() => {
+                            showToast('系统初始化成功！', 'success');
+                        })
+                        .catch((error) => {
+                            console.error('重新初始化失败:', error);
+                            showToast('系统初始化失败，请刷新页面', 'error');
+                        });
+                }
+                
                 return false;
             }
             return true;
@@ -2816,10 +2881,8 @@
             }
         }
 
-        // 由于代码过长，我将继续在下一条消息中输出剩余的JavaScript代码...
-        // 剩余功能包括：查询、历史记录、管理员功能、导出等
-
-                // ========================================
+        // 由于代码过长，我将在下一条消息中继续输出剩余的JavaScript代码...
+        // ========================================
         // 切换到查询区域
         // ========================================
         function showQuerySection() {
@@ -2918,7 +2981,6 @@
                 showToast('加载失败：' + error.message, 'error');
             }
         }
-
 
         // ========================================
         // 历史记录：渲染表格
@@ -4106,22 +4168,35 @@
         }
 
         // ========================================
-        // 页面加载完成后初始化
+        // 页面加载完成后初始化（增强版）
         // ========================================
         window.addEventListener('DOMContentLoaded', async function() {
             console.log('🚀 页面加载完成，开始初始化...');
+            console.log('浏览器信息:', navigator.userAgent);
+            console.log('Supabase 库状态:', typeof window.supabase !== 'undefined' ? '已加载' : '未加载');
             
             // 初始化粒子背景
-            initParticles();
+            try {
+                initParticles();
+                console.log('✅ 粒子背景初始化成功');
+            } catch (error) {
+                console.error('❌ 粒子背景初始化失败:', error);
+            }
+            
+            // 显示加载提示
+            showLoading('系统初始化中...');
             
             try {
                 // 初始化 Supabase
                 await initSupabase();
                 console.log('✅ 系统初始化成功');
+                hideLoading();
                 
                 // 检查是否有保存的登录状态
                 if (authToken && authToken !== 'admin') {
                     try {
+                        showLoading('正在恢复登录状态...');
+                        
                         const result = await supabaseClient
                             .from('users')
                             .select('*')
@@ -4136,43 +4211,128 @@
                             showQuerySection();
                             addQueryRow();
                             console.log('✅ 自动登录成功');
+                            showToast('欢迎回来！', 'success');
                         } else {
                             localStorage.removeItem('authToken');
                             authToken = null;
+                            console.log('⚠️ 登录状态已失效');
                         }
+                        
+                        hideLoading();
                     } catch (error) {
                         console.error('自动登录失败:', error);
                         localStorage.removeItem('authToken');
                         authToken = null;
+                        hideLoading();
                     }
                 } else if (authToken === 'admin') {
                     document.getElementById('loginContainer').style.display = 'none';
                     document.getElementById('adminInterface').classList.add('active');
                     loadAdminData();
                     console.log('✅ 管理员自动登录成功');
+                    showToast('管理员登录成功！', 'success');
+                } else {
+                    console.log('ℹ️ 未检测到登录状态');
                 }
                 
             } catch (error) {
                 console.error('❌ 系统初始化失败:', error);
-                showToast('系统初始化失败：' + error.message, 'error');
+                hideLoading();
+                
+                // 显示详细错误信息
+                let errorMessage = '系统初始化失败：' + error.message;
+                
+                if (error.message.includes('库未加载') || error.message.includes('加载超时')) {
+                    errorMessage = '网络连接异常，请检查网络后刷新页面';
+                } else if (error.message.includes('连接超时')) {
+                    errorMessage = '服务器连接超时，请稍后再试';
+                } else if (error.message.includes('未配置')) {
+                    errorMessage = '系统配置错误，请联系管理员';
+                }
+                
+                showToast(errorMessage, 'error');
+                
+                // 显示重试按钮
+                const retryBtn = document.createElement('button');
+                retryBtn.className = 'login-btn';
+                retryBtn.textContent = '🔄 重新初始化';
+                retryBtn.style.marginTop = '20px';
+                retryBtn.onclick = function() {
+                    location.reload();
+                };
+                
+                const loginCard = document.querySelector('.login-card');
+                if (loginCard && !document.getElementById('retryBtn')) {
+                    retryBtn.id = 'retryBtn';
+                    loginCard.appendChild(retryBtn);
+                }
             }
+        });
+
+        // ========================================
+        // 监听 Supabase 库加载（备用方案）
+        // ========================================
+        window.addEventListener('load', function() {
+            console.log('📄 页面完全加载完成');
+            
+            // 如果 DOMContentLoaded 时库未加载，这里再检查一次
+            if (!isSystemInitialized && typeof window.supabase !== 'undefined') {
+                console.log('🔄 检测到 Supabase 库延迟加载，开始初始化...');
+                initSupabase()
+                    .then(() => {
+                        console.log('✅ 延迟初始化成功');
+                        hideLoading();
+                    })
+                    .catch((error) => {
+                        console.error('❌ 延迟初始化失败:', error);
+                    });
+            }
+        });
+
+        // ========================================
+        // 网络状态监听
+        // ========================================
+        window.addEventListener('online', function() {
+            console.log('🌐 网络已连接');
+            if (!isSystemInitialized) {
+                showToast('网络已恢复，正在重新初始化...', 'success');
+                initSupabase()
+                    .then(() => {
+                        showToast('系统初始化成功！', 'success');
+                    })
+                    .catch((error) => {
+                        console.error('重新初始化失败:', error);
+                    });
+            }
+        });
+
+        window.addEventListener('offline', function() {
+            console.log('🌐 网络已断开');
+            showToast('网络连接已断开，请检查网络', 'error');
         });
 
         // ========================================
         // 回车键登录
         // ========================================
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('loginPhone').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    handleLogin();
-                }
-            });
+            const loginPhone = document.getElementById('loginPhone');
+            const loginPassword = document.getElementById('loginPassword');
             
-            document.getElementById('loginPassword').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    handleLogin();
-                }
-            });
+            if (loginPhone) {
+                loginPhone.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        handleLogin();
+                    }
+                });
+            }
+            
+            if (loginPassword) {
+                loginPassword.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        handleLogin();
+                    }
+                });
+            }
         });
     </script>
 </body>
