@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>快递查询系统</title>
+    <title>快递查询系统 - 简约版</title>
     
     <!-- 引入Supabase客户端 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -23,9 +23,9 @@
             --primary-color: #ffffff;
             --secondary-color: #cccccc;
             --accent-color: #888888;
-            --success-color: #aaaaaa;
-            --warning-color: #999999;
-            --danger-color: #666666;
+            --success-color: #4ade80;
+            --warning-color: #fbbf24;
+            --danger-color: #ef4444;
             --bg-dark: #0a0a0a;
             --bg-darker: #000000;
             --bg-card: #1a1a1a;
@@ -195,7 +195,8 @@
             letter-spacing: 1px;
         }
 
-        .form-group input {
+        .form-group input,
+        .form-group textarea {
             width: 100%;
             padding: 15px 20px;
             background: rgba(0, 0, 0, 0.5);
@@ -204,9 +205,17 @@
             font-size: 15px;
             color: var(--text-primary);
             transition: all 0.3s;
+            font-family: inherit;
         }
 
-        .form-group input:focus {
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+            line-height: 1.6;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
             outline: none;
             border-color: rgba(255, 255, 255, 0.3);
             box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
@@ -759,7 +768,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* 快递状态 */
+        /* 快递状态 - 彩色版本 */
         .express-status {
             display: inline-block;
             padding: 6px 15px;
@@ -768,6 +777,156 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 已签收 - 绿色 */
+        .express-status.signed {
+            background: rgba(74, 222, 128, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.2);
+        }
+
+        /* 派件中 - 蓝色 */
+        .express-status.delivering {
+            background: rgba(96, 165, 250, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            box-shadow: 0 0 15px rgba(96, 165, 250, 0.2);
+        }
+
+        /* 在途中 - 黄色 */
+        .express-status.transit {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.2);
+        }
+
+        /* 揽收 - 紫色 */
+        .express-status.collected {
+            background: rgba(168, 85, 247, 0.15);
+            color: #a855f7;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+        }
+
+        /* 疑难/退回 - 红色 */
+        .express-status.problem {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+        }
+
+        /* 快递公司标签 - 带品牌色 */
+        .company-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 15px;
+            border-radius: 15px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .company-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .company-badge img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+        }
+
+        /* 顺丰 - 红色 */
+        .company-sf {
+            background: rgba(220, 38, 38, 0.15);
+            color: #dc2626;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+        }
+
+        /* 京东 - 红色 */
+        .company-jd {
+            background: rgba(220, 38, 38, 0.15);
+            color: #dc2626;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+        }
+
+        /* 圆通 - 蓝色 */
+        .company-yt {
+            background: rgba(37, 99, 235, 0.15);
+            color: #2563eb;
+            border: 1px solid rgba(37, 99, 235, 0.3);
+        }
+
+        /* 中通 - 绿色 */
+        .company-zt {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        /* 申通 - 黄色 */
+        .company-st {
+            background: rgba(234, 179, 8, 0.15);
+            color: #eab308;
+            border: 1px solid rgba(234, 179, 8, 0.3);
+        }
+
+        /* 韵达 - 青色 */
+        .company-yd {
+            background: rgba(6, 182, 212, 0.15);
+            color: #06b6d4;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+
+        /* 百世 - 橙色 */
+        .company-bs {
+            background: rgba(249, 115, 22, 0.15);
+            color: #f97316;
+            border: 1px solid rgba(249, 115, 22, 0.3);
+        }
+
+        /* 邮政 - 绿色 */
+        .company-ems {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        /* 天天 - 紫色 */
+        .company-tt {
+            background: rgba(168, 85, 247, 0.15);
+            color: #a855f7;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        /* 德邦 - 蓝色 */
+        .company-db {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        /* 极兔 - 粉色 */
+        .company-jt {
+            background: rgba(236, 72, 153, 0.15);
+            color: #ec4899;
+            border: 1px solid rgba(236, 72, 153, 0.3);
+        }
+
+        /* 默认 - 灰色 */
+        .company-default {
             background: rgba(255, 255, 255, 0.1);
             color: var(--text-primary);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -1467,6 +1626,7 @@
 </head>
 <body>
     <!-- 动态背景粒子 -->
+    <!-- 动态背景粒子 -->
     <canvas id="particles-bg"></canvas>
 
     <div class="container">
@@ -1550,6 +1710,7 @@
                 
                 <div class="action-buttons">
                     <button class="btn btn-primary" onclick="addQueryRow()">➕ 添加查询</button>
+                    <button class="btn btn-primary" onclick="openBatchImportModal()">📋 批量导入</button>
                     <button class="btn btn-primary" onclick="batchQuery()">🚀 批量查询</button>
                     <button class="btn btn-success" onclick="exportToExcel()">📊 导出Excel</button>
                     <button class="btn btn-primary" onclick="showHistorySection()">📜 查询历史</button>
@@ -1705,6 +1866,41 @@
         </div>
 
         <!-- ========================================
+             批量导入弹窗
+             ======================================== -->
+        <div id="batchImportModal" class="modal">
+            <div class="glass-card modal-content">
+                <div class="modal-header">
+                    <h2>📋 批量导入快递单号</h2>
+                    <button class="modal-close-btn" onclick="closeBatchImportModal()">✕</button>
+                </div>
+                
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>快递单号（每行一个）</label>
+                        <textarea id="batchImportText" placeholder="请粘贴快递单号，每行一个&#10;例如：&#10;SF1234567890&#10;YT9876543210&#10;ZTO1122334455&#10;&#10;支持格式：&#10;• 纯单号（每行一个）&#10;• 单号+手机号后四位（用空格或逗号分隔）&#10;  例如：SF1234567890 1234"></textarea>
+                    </div>
+                    
+                    <div class="info-box">
+                        <div style="font-size: 14px; line-height: 1.6;">
+                            <div style="font-weight: 600; margin-bottom: 8px;">💡 使用说明</div>
+                            <div>• 每行输入一个快递单号</div>
+                            <div>• 支持从Excel、文本文件直接复制粘贴</div>
+                            <div>• 可选：在单号后添加手机号后四位（空格或逗号分隔）</div>
+                            <div>• 系统会自动过滤空行和重复单号</div>
+                            <div>• 导入后会自动创建查询行，点击"批量查询"开始查询</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="modal-btn modal-btn-cancel" onclick="closeBatchImportModal()">取消</button>
+                    <button class="modal-btn modal-btn-confirm" onclick="confirmBatchImport()">确认导入</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================
              设置密码弹窗（首次登录）
              ======================================== -->
         <div id="setPasswordModal" class="modal">
@@ -1731,8 +1927,7 @@
                     
                     <div class="form-group">
                         <label>确认密码</label>
-                        <input type="password"
- id="confirmPasswordSet" placeholder="请再次输入密码" maxlength="20">
+                        <input type="password" id="confirmPasswordSet" placeholder="请再次输入密码" maxlength="20">
                     </div>
                 </div>
                 
@@ -1949,7 +2144,6 @@
             </div>
         </div>
     </div>
-
     <script>
         // ========================================
         // 全局变量声明
@@ -1977,6 +2171,83 @@
 
         // 阿里云快递查询API配置
         const ALIYUN_APPCODE = '8c02c90948e246a994147ed55109955c';
+
+        // ========================================
+        // 快递公司品牌色映射
+        // ========================================
+        const COMPANY_COLORS = {
+            '顺丰': 'company-sf',
+            '顺丰速运': 'company-sf',
+            'SF': 'company-sf',
+            '京东': 'company-jd',
+            '京东快递': 'company-jd',
+            'JD': 'company-jd',
+            '圆通': 'company-yt',
+            '圆通速递': 'company-yt',
+            'YTO': 'company-yt',
+            '中通': 'company-zt',
+            '中通快递': 'company-zt',
+            'ZTO': 'company-zt',
+            '申通': 'company-st',
+            '申通快递': 'company-st',
+            'STO': 'company-st',
+            '韵达': 'company-yd',
+            '韵达快递': 'company-yd',
+            'YD': 'company-yd',
+            '百世': 'company-bs',
+            '百世快递': 'company-bs',
+            'BEST': 'company-bs',
+            '邮政': 'company-ems',
+            'EMS': 'company-ems',
+            '中国邮政': 'company-ems',
+            '天天': 'company-tt',
+            '天天快递': 'company-tt',
+            'TTKD': 'company-tt',
+            '德邦': 'company-db',
+            '德邦快递': 'company-db',
+            'DEPPON': 'company-db',
+            '极兔': 'company-jt',
+            '极兔速递': 'company-jt',
+            'JT': 'company-jt'
+        };
+
+        // ========================================
+        // 获取快递公司品牌色类名
+        // ========================================
+        function getCompanyColorClass(companyName) {
+            if (!companyName) return 'company-default';
+            
+            for (let key in COMPANY_COLORS) {
+                if (companyName.includes(key)) {
+                    return COMPANY_COLORS[key];
+                }
+            }
+            
+            return 'company-default';
+        }
+
+        // ========================================
+        // 获取快递状态样式类名
+        // ========================================
+        function getExpressStatusClass(status, statusCode) {
+            if (!status) return '';
+            
+            // 根据状态码判断
+            if (statusCode === 3 || status.includes('已签收') || status.includes('已收货') || status.includes('签收')) {
+                return 'signed';
+            } else if (statusCode === 5 || status.includes('派件') || status.includes('派送')) {
+                return 'delivering';
+            } else if (statusCode === 0 || status.includes('在途') || status.includes('运输')) {
+                return 'transit';
+            } else if (statusCode === 1 || status.includes('揽收') || status.includes('已揽件')) {
+                return 'collected';
+            } else if (statusCode === 2 || statusCode === 4 || statusCode === 6 || 
+                       status.includes('疑难') || status.includes('退回') || status.includes('拒收')) {
+                return 'problem';
+            }
+            
+            return '';
+        }
 
         // ========================================
         // 工具函数：手机号脱敏显示
@@ -2445,7 +2716,6 @@
                 showToast('登录失败：' + error.message, 'error');
             }
         }
-
         // ========================================
         // 确认设置密码（首次登录）
         // ========================================
@@ -2856,6 +3126,114 @@
         }
 
         // ========================================
+        // 打开批量导入弹窗
+        // ========================================
+        function openBatchImportModal() {
+            document.getElementById('batchImportText').value = '';
+            document.getElementById('batchImportModal').classList.add('active');
+        }
+
+        function closeBatchImportModal() {
+            document.getElementById('batchImportModal').classList.remove('active');
+        }
+
+        // ========================================
+        // 确认批量导入
+        // ========================================
+        function confirmBatchImport() {
+            const text = document.getElementById('batchImportText').value.trim();
+            
+            if (!text) {
+                showToast('请输入快递单号', 'error');
+                return;
+            }
+            
+            // 按行分割
+            const lines = text.split('\n');
+            const importData = [];
+            const seenNumbers = new Set();
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue; // 跳过空行
+                
+                let expressNumber = '';
+                let mobile = '';
+                
+                // 尝试分割（支持空格、逗号、制表符）
+                const parts = line.split(/[\s,\t]+/);
+                
+                if (parts.length >= 1) {
+                    expressNumber = parts[0].trim();
+                    
+                    // 如果有第二部分，作为手机号后四位
+                    if (parts.length >= 2) {
+                        mobile = parts[1].trim();
+                        // 验证是否为4位数字
+                        if (!/^\d{4}$/.test(mobile)) {
+                            mobile = ''; // 不符合格式，清空
+                        }
+                    }
+                }
+                
+                // 验证快递单号（至少6位）
+                if (expressNumber && expressNumber.length >= 6) {
+                    // 去重
+                    const key = expressNumber + '_' + mobile;
+                    if (!seenNumbers.has(key)) {
+                        seenNumbers.add(key);
+                        importData.push({
+                            expressNumber: expressNumber,
+                            mobile: mobile
+                        });
+                    }
+                }
+            }
+            
+            if (importData.length === 0) {
+                showToast('没有找到有效的快递单号', 'error');
+                return;
+            }
+            
+            // 创建查询行
+            for (let i = 0; i < importData.length; i++) {
+                const item = importData[i];
+                addQueryRowWithData(item.expressNumber, item.mobile);
+            }
+            
+            closeBatchImportModal();
+            showToast('成功导入 ' + importData.length + ' 个快递单号！', 'success');
+        }
+
+        // ========================================
+        // 添加查询行（带数据）
+        // ========================================
+        function addQueryRowWithData(expressNumber, mobile) {
+            queryRowCounter++;
+            const tbody = document.getElementById('queryTableBody');
+            const row = document.createElement('tr');
+            row.id = 'queryRow-' + queryRowCounter;
+            
+            row.innerHTML = '<td>' +
+                '<input type="text" id="expressNumber-' + queryRowCounter + '" placeholder="请输入快递单号" value="' + (expressNumber || '') + '" />' +
+                '</td>' +
+                '<td>' +
+                '<input type="text" id="mobile-' + queryRowCounter + '" placeholder="选填" maxlength="4" value="' + (mobile || '') + '" />' +
+                '</td>' +
+                '<td>' +
+                '<span class="query-status-badge query-status-pending">待查询</span>' +
+                '</td>' +
+                '<td>-</td>' +
+                '<td>-</td>' +
+                '<td>' +
+                '<button class="btn-query" onclick="querySingleExpress(' + queryRowCounter + ')">查询</button>' +
+                '<button class="btn-query btn-delete" onclick="deleteQueryRow(' + queryRowCounter + ')">删除</button>' +
+                '</td>';
+            
+            tbody.appendChild(row);
+        }
+
+        // ========================================
         // 管理员：更新统计数据
         // ========================================
         async function updateAdminStats() {
@@ -2881,7 +3259,6 @@
             }
         }
 
-        // 由于代码过长，我将在下一条消息中继续输出剩余的JavaScript代码...
         // ========================================
         // 切换到查询区域
         // ========================================
@@ -2981,9 +3358,8 @@
                 showToast('加载失败：' + error.message, 'error');
             }
         }
-
         // ========================================
-        // 历史记录：渲染表格
+        // 历史记录：渲染表格（带彩色标签）
         // ========================================
         function renderHistoryTable() {
             const tbody = document.getElementById('historyTableBody');
@@ -3006,11 +3382,37 @@
                 const item = filteredHistoryData[i];
                 const row = document.createElement('tr');
                 
+                // 解析物流数据获取状态码
+                let statusCode = null;
+                if (item.logistics_data) {
+                    try {
+                        const logisticsData = typeof item.logistics_data === 'string' ? 
+                            JSON.parse(item.logistics_data) : item.logistics_data;
+                        statusCode = logisticsData.status_code;
+                    } catch (error) {
+                        console.error('解析物流数据失败:', error);
+                    }
+                }
+                
+                // 获取快递状态样式类
+                const statusClass = getExpressStatusClass(item.express_status, statusCode);
+                
+                // 获取快递公司品牌色类
+                const companyClass = getCompanyColorClass(item.company_name);
+                
                 row.innerHTML = '<td>' + formatDate(item.query_time || item.created_at) + '</td>' +
                     '<td>' + (item.express_number || '-') + '</td>' +
                     '<td>' + (item.mobile || '-') + '</td>' +
-                    '<td>' + (item.company_name || '-') + '</td>' +
-                    '<td>' + (item.express_status || '-') + '</td>' +
+                    '<td>' + 
+                    (item.company_name ? 
+                        '<span class="company-badge ' + companyClass + '">' + item.company_name + '</span>' : 
+                        '-') + 
+                    '</td>' +
+                    '<td>' + 
+                    (item.express_status ? 
+                        '<span class="express-status ' + statusClass + '">' + item.express_status + '</span>' : 
+                        '-') + 
+                    '</td>' +
                     '<td>' +
                     '<span class="query-status-badge query-status-' + item.status + '">' +
                     (item.status === 'success' ? '成功' : '失败') +
@@ -3058,7 +3460,7 @@
         }
 
         // ========================================
-        // 历史记录：显示详情
+        // 历史记录：显示详情（物流轨迹从新到旧）🔥 关键修改
         // ========================================
         function showHistoryDetail(index) {
             const item = filteredHistoryData[index];
@@ -3113,7 +3515,7 @@
                 
                 detailHTML += '</div>' +
                     '<div>' +
-                    '<span class="express-status">' + 
+                    '<span class="express-status ' + getExpressStatusClass(logisticsData.status, logisticsData.status_code) + '">' + 
                     (logisticsData.status || '') + '</span>' +
                     '</div>' +
                     '</div>';
@@ -3138,15 +3540,18 @@
                 
                 detailHTML += '</div>';
                 
-                // 物流轨迹
+                // 🔥 关键修改：物流轨迹 - 从新到旧排序
                 detailHTML += '<div class="logistics-timeline">' +
                     '<div class="timeline-title">🚚 物流轨迹</div>';
                 
                 const logisticsList = logisticsData.list || logisticsData.data || [];
                 
                 if (logisticsList && logisticsList.length > 0) {
-                    for (let j = 0; j < logisticsList.length; j++) {
-                        const trace = logisticsList[j];
+                    // 🔥 反转数组，使其从新到旧显示
+                    const reversedList = logisticsList.slice().reverse();
+                    
+                    for (let j = 0; j < reversedList.length; j++) {
+                        const trace = reversedList[j];
                         detailHTML += '<div class="logistics-item">' +
                             '<div class="logistics-time">' + (trace.time || '') + '</div>' +
                             '<div class="logistics-content">' +
@@ -3389,7 +3794,7 @@
         }
 
         // ========================================
-        // 查询：单个查询
+        // 查询：单个查询（带彩色标签）
         // ========================================
         async function querySingleExpress(rowId) {
             const expressNumber = document.getElementById('expressNumber-' + rowId).value.trim();
@@ -3504,12 +3909,18 @@
                     
                     queryDataCache[rowId] = unifiedData;
                     
+                    // 获取快递状态样式类
+                    const statusClass = getExpressStatusClass(data.logisticsStatusDesc, data.logisticsStatus);
+                    
+                    // 获取快递公司品牌色类
+                    const companyClass = getCompanyColorClass(data.expressCompanyName);
+                    
                     statusCell.innerHTML = '<span class="query-status-badge query-status-success">查询成功</span>';
-                    expressStatusCell.innerHTML = '<span class="express-status">' + data.logisticsStatusDesc + '</span>';
-                    companyCell.innerHTML = '<div style="display: flex; align-items: center; gap: 8px;">' +
-                        (data.expressCompanyLogo ? '<img src="' + data.expressCompanyLogo + '" style="width: 20px; height: 20px; object-fit: contain; filter: grayscale(100%) brightness(2);" alt="logo">' : '') +
+                    expressStatusCell.innerHTML = '<span class="express-status ' + statusClass + '">' + data.logisticsStatusDesc + '</span>';
+                    companyCell.innerHTML = '<span class="company-badge ' + companyClass + '">' +
+                        (data.expressCompanyLogo ? '<img src="' + data.expressCompanyLogo + '" alt="logo">' : '') +
                         '<span>' + data.expressCompanyName + '</span>' +
-                        '</div>';
+                        '</span>';
                     
                     actionCell.innerHTML = 
                         '<button class="btn-query btn-detail" onclick="showLogisticsDetail(' + rowId + ')">详情</button>' +
@@ -3563,7 +3974,6 @@
                 showToast('查询失败：' + error.message, 'error');
             }
         }
-
         // ========================================
         // 查询：批量查询
         // ========================================
@@ -3634,7 +4044,7 @@
         }
 
         // ========================================
-        // 查询：显示物流详情
+        // 查询：显示物流详情（物流轨迹从新到旧）🔥 关键修改
         // ========================================
         function showLogisticsDetail(rowId) {
             const logisticsData = queryDataCache[rowId];
@@ -3685,7 +4095,7 @@
             
             detailHTML += '</div>' +
                 '<div>' +
-                '<span class="express-status">' + 
+                '<span class="express-status ' + getExpressStatusClass(logisticsData.status, logisticsData.status_code) + '">' + 
                 logisticsData.status + '</span>' +
                 '</div>' +
                 '</div>';
@@ -3710,13 +4120,16 @@
             
             detailHTML += '</div>';
             
-            // 物流轨迹
+            // 🔥 关键修改：物流轨迹 - 从新到旧排序
             detailHTML += '<div class="logistics-timeline">' +
                 '<div class="timeline-title">🚚 物流轨迹</div>';
             
             if (logisticsData.list && logisticsData.list.length > 0) {
-                for (let i = 0; i < logisticsData.list.length; i++) {
-                    const trace = logisticsData.list[i];
+                // 🔥 反转数组，使其从新到旧显示
+                const reversedList = logisticsData.list.slice().reverse();
+                
+                for (let i = 0; i < reversedList.length; i++) {
+                    const trace = reversedList[i];
                     detailHTML += '<div class="logistics-item">' +
                         '<div class="logistics-time">' + (trace.time || '') + '</div>' +
                         '<div class="logistics-content">' +
@@ -4334,6 +4747,65 @@
                 });
             }
         });
+
+        // ========================================
+        // 防止意外关闭页面（查询进行中时）
+        // ========================================
+        window.addEventListener('beforeunload', function(e) {
+            const queryingRows = document.querySelectorAll('.query-status-querying');
+            if (queryingRows.length > 0) {
+                e.preventDefault();
+                e.returnValue = '查询正在进行中，确定要离开吗？';
+                return e.returnValue;
+            }
+        });
+
+        // ========================================
+        // 全局错误捕获
+        // ========================================
+        window.addEventListener('error', function(e) {
+            console.error('全局错误:', e.error);
+        });
+
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('未处理的Promise拒绝:', e.reason);
+        });
+
+        // ========================================
+        // 页面可见性变化监听（优化性能）
+        // ========================================
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                console.log('📴 页面已隐藏');
+            } else {
+                console.log('📱 页面已显示');
+                // 页面重新显示时刷新用户信息
+                if (currentUser && authToken !== 'admin') {
+                    refreshUserInfo();
+                }
+            }
+        });
+
+        // ========================================
+        // 控制台输出版本信息
+        // ========================================
+        console.log('%c快递查询系统 v2.0', 'color: #fff; background: #000; padding: 10px 20px; font-size: 16px; font-weight: bold;');
+        console.log('%c✨ 功能特性:', 'color: #4ade80; font-size: 14px; font-weight: bold;');
+        console.log('  • 批量导入快递单号');
+        console.log('  • 彩色快递状态标签');
+        console.log('  • 快递公司品牌色显示');
+        console.log('  • 历史记录去重优化');
+        console.log('  • 签收/未签收统计');
+        console.log('  • 物流轨迹从新到旧显示 ✅');
+        console.log('  • 黑灰半透明UI主题');
+        console.log('%c🔧 技术栈:', 'color: #60a5fa; font-size: 14px; font-weight: bold;');
+        console.log('  • Supabase (数据库)');
+        console.log('  • 阿里云快递查询API');
+        console.log('  • SheetJS (Excel导出)');
+        console.log('  • Canvas粒子动画');
+        console.log('%c📦 Made with ❤️', 'color: #a855f7; font-size: 12px;');
     </script>
 </body>
 </html>
+
+
