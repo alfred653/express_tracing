@@ -3720,37 +3720,42 @@
         }
 
         // ========================================
-        // 历史记录：删除单条记录
         // ========================================
-        async function deleteHistoryItem(index) {
-            if (!checkSystemInit()) return;
-            
-            const item = filteredHistoryData[index];
-            
-            if (!confirm('确定要删除这条查询记录吗？')) {
-                return;
-            }
-            
-            try {
-                showLoading('正在删除...');
-                
-                const result = await supabaseClient
-                    .from('query_logs')
-                    .delete()
-                    .eq('id', item.id);
-                
-                if (result.error) throw result.error;
-                
-                hideLoading();
-                showToast('删除成功！', 'success');
-                await loadHistoryData();
-                
-            } catch (error) {
-                console.error('删除失败:', error);
-                hideLoading();
-                showToast('删除失败：' + error.message, 'error');
-            }
-        }
+// 历史记录:删除单条记录(修复版 - 删除所有相同单号的记录)
+// ========================================
+async function deleteHistoryItem(index) {
+    if (!checkSystemInit()) return;
+    
+    const item = filteredHistoryData[index];
+    
+    if (!confirm('确定要删除快递单号 ' + item.express_number + ' 的所有查询记录吗?')) {
+        return;
+    }
+    
+    try {
+        showLoading('正在删除...');
+        
+        // 🔥 关键修改:删除该用户所有相同快递单号和手机号的记录
+        const result = await supabaseClient
+            .from('query_logs')
+            .delete()
+            .eq('user_id', currentUser.id)
+            .eq('express_number', item.express_number)
+            .eq('mobile', item.mobile || '');
+        
+        if (result.error) throw result.error;
+        
+        hideLoading();
+        showToast('删除成功!', 'success');
+        await loadHistoryData();
+        
+    } catch (error) {
+        console.error('删除失败:', error);
+        hideLoading();
+        showToast('删除失败:' + error.message, 'error');
+    }
+}
+
 
         // ========================================
         // 查询：添加查询行
