@@ -3723,39 +3723,96 @@
         // ========================================
 // 历史记录:删除单条记录(修复版 - 删除所有相同单号的记录)
 // ========================================
+// ========================================
+// 历史记录：删除单条记录（完全修复版）
+// ========================================
 async function deleteHistoryItem(index) {
     if (!checkSystemInit()) return;
     
     const item = filteredHistoryData[index];
     
-    if (!confirm('确定要删除快递单号 ' + item.express_number + ' 的所有查询记录吗？')) {
+    if (!item || !item.id) {
+        showToast('记录信息不完整', 'error');
+        return;
+    }
+    
+    // 🔥 方案1：直接通过 ID 删除（最可靠）
+    if (!confirm('确定要删除这条查询记录吗？')) {
         return;
     }
     
     try {
         showLoading('正在删除...');
         
-        // 🔥 构建删除查询
-        let deleteQuery = supabaseClient
+        console.log('准备删除记录 ID:', item.id); // 调试日志
+        
+        // 🔥 关键修复：直接使用 ID 删除，避免复杂条件
+        const result = await supabaseClient
             .from('query_logs')
             .delete()
-            .eq('user_id', currentUser.id)
-            .eq('express_number', item.express_number);
+            .eq('id', item.id);
         
-        // 🔥 处理 mobile 字段（NULL 值需要特殊处理）
-        if (item.mobile) {
-            deleteQuery = deleteQuery.eq('mobile', item.mobile);
-        } else {
-            deleteQuery = deleteQuery.is('mobile', null);
+        console.log('删除结果:', result); // 调试日志
+        
+        // 🔥 检查是否真的删除成功
+        if (result.error) {
+            console.error('删除错误:', result.error);
+            throw result.error;
         }
         
-        const result = await deleteQuery;
+        // 🔥 验证删除：检查记录是否还存在
+        const checkResult = await supabaseClient
+            .from('query_logs')
+            .select('id')
+            .eq('id', item.id)
+            .single();
         
-        if (result.error) throw result.error;
+        if (checkResult.data) {
+            throw new Error('删除失败：记录仍然存在（可能是权限问题）');
+        }
         
         hideLoading();
         showToast('删除成功！', 'success');
-        await loadHistoryData(); // 重新加载数据
+        
+        // 🔥 立即从本地数据中移除
+        historyData = historyData.filter(h => h.id !== item.id);
+        filteredHistoryData = filteredHistoryData.filter(h => h.id !== item.id);
+        
+        // 重新渲染表格
+        renderHistoryTable();
+        
+        // 更新统计数据
+        const totalCount = historyData.length;
+        let signedCount = 0;
+        let unsignedCount = 0;
+        
+        historyData.forEach(item => {
+            if (item.status === 'success' && item.logistics_data) {
+                try {
+                    const logisticsData = typeof item.logistics_data === 'string' ? 
+                        JSON.parse(item.logistics_data) : item.logistics_data;
+                    
+                    if (logisticsData.status_code === 3 || 
+                        (logisticsData.status && (
+                            logisticsData.status.includes('已签收') || 
+                            logisticsData.status.includes('已收货') ||
+                            logisticsData.status.includes('签收')
+                        ))) {
+                        signedCount++;
+                    } else {
+                        unsignedCount++;
+                    }
+                } catch (error) {
+                    unsignedCount++;
+                }
+            } else {
+                unsignedCount++;
+            }
+        });
+        
+        document.getElementById('historyTotalCount').textContent = totalCount;
+        document.getElementById('historySuccessCount').textContent = signedCount;
+        document.getElementById('historyFailedCount').textContent = unsignedCount;
         
     } catch (error) {
         console.error('删除失败:', error);
@@ -3763,6 +3820,7 @@ async function deleteHistoryItem(index) {
         showToast('删除失败：' + error.message, 'error');
     }
 }
+
 
 
         // ========================================
