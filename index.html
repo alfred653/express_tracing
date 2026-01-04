@@ -3728,31 +3728,39 @@ async function deleteHistoryItem(index) {
     
     const item = filteredHistoryData[index];
     
-    if (!confirm('确定要删除快递单号 ' + item.express_number + ' 的所有查询记录吗?')) {
+    if (!confirm('确定要删除快递单号 ' + item.express_number + ' 的所有查询记录吗？')) {
         return;
     }
     
     try {
         showLoading('正在删除...');
         
-        // 🔥 关键修改:删除该用户所有相同快递单号和手机号的记录
-        const result = await supabaseClient
+        // 🔥 构建删除查询
+        let deleteQuery = supabaseClient
             .from('query_logs')
             .delete()
             .eq('user_id', currentUser.id)
-            .eq('express_number', item.express_number)
-            .eq('mobile', item.mobile || '');
+            .eq('express_number', item.express_number);
+        
+        // 🔥 处理 mobile 字段（NULL 值需要特殊处理）
+        if (item.mobile) {
+            deleteQuery = deleteQuery.eq('mobile', item.mobile);
+        } else {
+            deleteQuery = deleteQuery.is('mobile', null);
+        }
+        
+        const result = await deleteQuery;
         
         if (result.error) throw result.error;
         
         hideLoading();
-        showToast('删除成功!', 'success');
-        await loadHistoryData();
+        showToast('删除成功！', 'success');
+        await loadHistoryData(); // 重新加载数据
         
     } catch (error) {
         console.error('删除失败:', error);
         hideLoading();
-        showToast('删除失败:' + error.message, 'error');
+        showToast('删除失败：' + error.message, 'error');
     }
 }
 
